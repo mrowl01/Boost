@@ -6,6 +6,8 @@ using UnityStandardAssets.CrossPlatformInput;
 public class Rocket : MonoBehaviour {
 
 	public AudioClip[] audioClips;
+	enum State { Alive,Dying,Transcending}
+	State state = State.Alive;
 
 
 	[SerializeField]
@@ -27,8 +29,10 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Thrust ();
-		Rotation ();
+		if (state == State.Alive) {
+			Thrust ();
+			Rotation ();
+		}
 	}
 
 	 void Rotation ()
@@ -67,14 +71,28 @@ public class Rocket : MonoBehaviour {
 	{
 		if (collision.gameObject.tag == "Finish") {
 			print ("Next level");
-			sceneBoss.LoadNextScene (); 
+			state = State.Transcending;
+			Invoke ("LoadNextScene", 5);
 		} 
 		if (collision.gameObject.tag == "Friendly") {
 		
 			return;
 		}
 		if (collision.gameObject.tag != "Friendly" || collision.gameObject.tag != "Finish") {
+			state = State.Dying;
+			audioSource.Stop ();
+			Invoke("LoadLevelOne",2); 
 			print ("Boom"); 
 		}
+	}
+	void LoadNextScene()
+	{
+		state = State.Alive;
+		sceneBoss.LoadNextScene ();
+	}
+	void LoadLevelOne()
+	{
+		state = State.Alive;
+		sceneBoss.LoadScene ("Game");
 	}
 }
