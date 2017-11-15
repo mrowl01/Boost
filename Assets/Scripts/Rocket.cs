@@ -5,8 +5,13 @@ using UnityStandardAssets.CrossPlatformInput;
 
 public class Rocket : MonoBehaviour {
 
-	public float thrustForce= 25;
 	public AudioClip[] audioClips;
+
+
+	[SerializeField]
+	private float thrustForce= 25 ;
+	[SerializeField]
+	private float rotationSpeed=150;
 
 	private Vector3 thrust;
 	private Vector3 rotation;
@@ -20,24 +25,30 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		ProcessInput ();
+		Thrust ();
+		Rotation ();
 	}
 
-	 void ProcessInput ()
+	 void Rotation ()
 	{
-		thrust.y = CrossPlatformInputManager.GetAxis ("Jump") * thrustForce;
-		thrust.x = 0;
-		thrust.z = 0;
-
+		rigidBody.freezeRotation = true;//manual control of rotation
 		rotation.y = 0;
 		rotation.z= CrossPlatformInputManager.GetAxis("Horizontal");
 		rotation.x = 0;
 
-		transform.Rotate (-rotation);
-		rigidBody.AddRelativeForce (thrust);
-		ThrustSound (thrust.y);
-
+		transform.Rotate (-rotation * rotationSpeed*Time.deltaTime);
+		rigidBody.freezeRotation= false;//resume phsyics rotation
 	}
+
+	void Thrust ()
+	{
+		thrust.y = CrossPlatformInputManager.GetAxis ("Jump") * thrustForce;
+		thrust.x = 0;
+		thrust.z = 0;
+		rigidBody.AddRelativeForce (thrust );
+		ThrustSound (thrust.y);
+	}
+
 	void ThrustSound (float sound)
 	{
 		if (CrossPlatformInputManager.GetButtonDown ("Jump")) {
@@ -50,4 +61,12 @@ public class Rocket : MonoBehaviour {
 			audioSource.Play ();
 		}
 	}	
+	void OnCollisionEnter (Collision collision)
+	{
+		if (collision.gameObject.tag == "Friendly") {
+			return;
+		} else if (collision.gameObject.tag != "Friendly") {
+			Destroy (gameObject);
+		}
+	}
 }
