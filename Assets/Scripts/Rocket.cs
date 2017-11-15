@@ -17,10 +17,12 @@ public class Rocket : MonoBehaviour {
 	private Vector3 rotation;
 	private Rigidbody rigidBody;
 	private AudioSource audioSource;
+	private SceneBoss sceneBoss;
 	// Use this for initialization
 	void Start () {
 		rigidBody = GetComponent<Rigidbody> ();	
 		audioSource = GetComponent<AudioSource> ();
+		sceneBoss = GameObject.FindObjectOfType<SceneBoss> ();
 	}
 	
 	// Update is called once per frame
@@ -63,10 +65,16 @@ public class Rocket : MonoBehaviour {
 	}	
 	void OnCollisionEnter (Collision collision)
 	{
+		if (collision.gameObject.tag == "Finish") {
+			print ("Next level");
+			sceneBoss.LoadNextScene (); 
+		} 
 		if (collision.gameObject.tag == "Friendly") {
+		
 			return;
-		} else if (collision.gameObject.tag != "Friendly") {
-			Destroy (gameObject);
+		}
+		if (collision.gameObject.tag != "Friendly" || collision.gameObject.tag != "Finish") {
+			print ("Boom"); 
 		}
 	}
 }

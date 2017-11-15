@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 23944502872854322}
   m_Layer: 0
   m_Name: EndingPad
-  m_TagString: Friendly
+  m_TagString: Finish
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -37,7 +37,7 @@ Transform:
   m_GameObject: {fileID: 1252955848167102}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 60.94587, y: 39.74451, z: -88.201675}
-  m_LocalScale: {x: 3.1151428, y: 2.1482353, z: 3.907503}
+  m_LocalScale: {x: 5.982365, y: 4.1255016, z: 7.504024}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
