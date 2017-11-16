@@ -4,11 +4,14 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 public class Rocket : MonoBehaviour {
-
-	public AudioClip[] audioClips;
+	
+	[SerializeField] AudioClip[] audioClips;
 	enum State { Alive,Dying,Transcending}
 	State state = State.Alive;
 
+	[SerializeField] ParticleSystem win;
+	[SerializeField] ParticleSystem lose;
+	[SerializeField] ParticleSystem pThrust;
 
 	[SerializeField]
 	private float thrustForce= 25 ;
@@ -37,13 +40,13 @@ public class Rocket : MonoBehaviour {
 
 	 void Rotation ()
 	{
-		rigidBody.freezeRotation = true;//manual control of rotation
+		rigidBody.angularVelocity = Vector3.zero;
 		rotation.y = 0;
 		rotation.z= CrossPlatformInputManager.GetAxis("Horizontal");
 		rotation.x = 0;
 
 		transform.Rotate (-rotation * rotationSpeed*Time.deltaTime);
-		rigidBody.freezeRotation= false;//resume phsyics rotation
+
 	}
 
 	void Thrust ()
@@ -52,38 +55,50 @@ public class Rocket : MonoBehaviour {
 		thrust.x = 0;
 		thrust.z = 0;
 		rigidBody.AddRelativeForce (thrust );
-		ThrustSound (thrust.y);
+		ThrustSound ();
+
 	}
 
-	void ThrustSound (float sound)
+	void ThrustSound ()
 	{
 		if (CrossPlatformInputManager.GetButtonDown ("Jump")) {
 			audioSource.clip = audioClips [0];
 			audioSource.Play ();
+			pThrust.Play ();
 
 		}  
 		else if (CrossPlatformInputManager.GetButtonUp ("Jump")) {
+			pThrust.Stop ();
 			audioSource.clip = audioClips [1];
 			audioSource.Play ();
 		}
 	}	
 	void OnCollisionEnter (Collision collision)
 	{
-		if (collision.gameObject.tag == "Finish") {
-			print ("Next level");
-			state = State.Transcending;
-			Invoke ("LoadNextScene", 5);
-		} 
-		if (collision.gameObject.tag == "Friendly") {
-		
+		if (state != State.Alive) {
 			return;
 		}
-		if (collision.gameObject.tag != "Friendly" || collision.gameObject.tag != "Finish") {
+
+		else if (collision.gameObject.tag == "Friendly") {
+
+			return;
+		}
+		else if (collision.gameObject.tag == "Finish") {
+			print ("Next level");
+			state = State.Transcending;
+			win.Play ();
+			DelayClipNumber (3);
+			Invoke ("LoadNextScene", audioSource.clip.length+1);
+		} 
+		else if (collision.gameObject.tag != "Friendly" || collision.gameObject.tag != "Finish") {
 			state = State.Dying;
-			audioSource.Stop ();
-			Invoke("LoadLevelOne",2); 
+			lose.Play ();
+			DelayClipNumber (2);
+			Invoke("LoadLevelOne",audioSource.clip.length + 1); 
 			print ("Boom"); 
 		}
+
+	
 	}
 	void LoadNextScene()
 	{
@@ -95,4 +110,16 @@ public class Rocket : MonoBehaviour {
 		state = State.Alive;
 		sceneBoss.LoadScene ("Game");
 	}
+	void EndAudioSourceWithDelay()
+	{
+		audioSource.Stop ();
+	}
+
+	void DelayClipNumber (int clip)
+	{
+		audioSource.clip = audioClips [clip];
+		audioSource.Play ();
+		Invoke ("EndAudioSourceWithDelay", audioSource.clip.length);
+	}
+
 }
